@@ -20,8 +20,8 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 ALGORITHM = "tf_conv"
 
 #DATASET = "mnist_d"
-DATASET = "mnist_f"
-#DATASET = "cifar_10"
+#DATASET = "mnist_f"
+DATASET = "cifar_10"
 #DATASET = "cifar_100_f"
 #DATASET = "cifar_100_c"
 
@@ -38,7 +38,11 @@ elif DATASET == "mnist_f":
     IZ = 1
     IS = 784
 elif DATASET == "cifar_10":
-    pass                                 # TODO: Add this case.
+    NUM_CLASSES = 10
+    IH = 32
+    IW = 32
+    IZ = 3
+    IS = IH * IW * IZ
 elif DATASET == "cifar_100_f":
     pass                                 # TODO: Add this case.
 elif DATASET == "cifar_100_c":
@@ -119,6 +123,29 @@ def buildTFConvNet(x, y, eps = 10, dropout = True, dropRate = 0.2):
         model.compile(optimizer='sgd', loss=tf.keras.losses.CategoricalCrossentropy())
         model.fit(x=x, y=y, epochs=15)
 
+    if (DATASET == "cifar_10"):
+        #convnet
+        model.add(tf.keras.layers.Conv2D(64, kernel_size=(3, 3), activation='relu', dilation_rate=(1, 1), padding='same', input_shape=data_shape))
+        model.add(tf.keras.layers.MaxPooling2D(pool_size=(2, 2)))
+        model.add(tf.keras.layers.Conv2D(128, kernel_size=(3, 3), activation='relu', dilation_rate=(1, 1), padding='same'))
+        model.add(tf.keras.layers.MaxPooling2D(pool_size=(2, 2)))
+        model.add(tf.keras.layers.Conv2D(256, kernel_size=(3, 3), activation='relu', dilation_rate=(1, 1)))
+        model.add(tf.keras.layers.MaxPooling2D(pool_size=(2, 2)))
+
+        model.add(tf.keras.layers.Flatten())
+        #neural net
+        model.add(tf.keras.layers.Dense(1024, activation=tf.nn.relu))
+        if (dropout):
+            model.add(tf.keras.layers.Dropout(dropRate))
+        model.add(tf.keras.layers.Dense(1024, activation=tf.nn.sigmoid))
+        if (dropout):
+            model.add(tf.keras.layers.Dropout(dropRate))
+        model.add(tf.keras.layers.Dense(y.shape[1], activation=tf.nn.softmax))
+
+        model.compile(optimizer='sgd', loss=tf.keras.losses.CategoricalCrossentropy())
+        model.fit(x=x, y=y, epochs=15)
+        
+
 
     return model
 
@@ -132,7 +159,8 @@ def getRawData():
         mnist = tf.keras.datasets.fashion_mnist
         (xTrain, yTrain), (xTest, yTest) = mnist.load_data()
     elif DATASET == "cifar_10":
-        pass      # TODO: Add this case.
+        cifar = tf.keras.datasets.cifar10
+        (xTrain, yTrain), (xTest, yTest) = cifar.load_data()
     elif DATASET == "cifar_100_f":
         pass      # TODO: Add this case.
     elif DATASET == "cifar_100_c":
