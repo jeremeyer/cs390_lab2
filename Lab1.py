@@ -16,8 +16,8 @@ tf.random.set_seed(1618)
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 #ALGORITHM = "guesser"
-#ALGORITHM = "tf_net"
-ALGORITHM = "tf_conv"
+ALGORITHM = "tf_net"
+#ALGORITHM = "tf_conv"
 
 #DATASET = "mnist_d"
 #DATASET = "mnist_f"
@@ -186,10 +186,13 @@ def buildTFConvNet(x, y, eps = 10, dropout = True, dropRate = 0.2):
         model.add(tf.keras.layers.Conv2D(64, kernel_size=(2, 2), activation='relu', dilation_rate=(1, 1), padding='same'))
         model.add(tf.keras.layers.MaxPooling2D(pool_size=(2, 2)))
         model.add(tf.keras.layers.Conv2D(128, kernel_size=(3, 3), activation='relu', dilation_rate=(1, 1), padding='same'))
+        #model.add(tf.keras.layers.Conv2D(128, kernel_size=(2, 2), activation='relu', dilation_rate=(1, 1), padding='same'))
         model.add(tf.keras.layers.MaxPooling2D(pool_size=(2, 2)))
         model.add(tf.keras.layers.Conv2D(256, kernel_size=(3, 3), activation='relu', dilation_rate=(1, 1), padding='same'))
+        #model.add(tf.keras.layers.Conv2D(256, kernel_size=(2, 2), activation='relu', dilation_rate=(1, 1), padding='same'))
         model.add(tf.keras.layers.MaxPooling2D(pool_size=(2, 2)))
         model.add(tf.keras.layers.Conv2D(512, kernel_size=(3, 3), activation='relu', dilation_rate=(1, 1), padding='same'))
+        model.add(tf.keras.layers.Conv2D(1024, kernel_size=(2, 2), activation='relu', dilation_rate=(1, 1), padding='same'))
         #model.add(tf.keras.layers.MaxPooling2D(pool_size=(2, 2)))
         #model.add(tf.keras.layers.Conv2D(1024, kernel_size=(3, 3), activation='relu', dilation_rate=(1, 1), padding='same'))
         #model.add(tf.keras.layers.MaxPooling2D(pool_size=(2, 2)))
