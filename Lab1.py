@@ -22,8 +22,8 @@ ALGORITHM = "tf_conv"
 #DATASET = "mnist_d"
 #DATASET = "mnist_f"
 #DATASET = "cifar_10"
-#DATASET = "cifar_100_f"
-DATASET = "cifar_100_c"
+DATASET = "cifar_100_f"
+#DATASET = "cifar_100_c"
 
 if DATASET == "mnist_d":
     NUM_CLASSES = 10
@@ -153,7 +153,7 @@ def buildTFConvNet(x, y, eps = 10, dropout = True, dropRate = 0.2):
         model.compile(optimizer='sgd', loss=tf.keras.losses.CategoricalCrossentropy())
         model.fit(x=x, y=y, epochs=15)
 
-    if (DATASET == "cifar_100_f" or DATASET == "cifar_100_c"):
+    if (DATASET == "cifar_100_c"):
         #convnet
         model.add(tf.keras.layers.Conv2D(64, kernel_size=(3, 3), activation='relu', dilation_rate=(1, 1), padding='same', input_shape=data_shape))
         model.add(tf.keras.layers.MaxPooling2D(pool_size=(2, 2)))
@@ -179,6 +179,36 @@ def buildTFConvNet(x, y, eps = 10, dropout = True, dropRate = 0.2):
 
         model.compile(optimizer='sgd', loss=tf.keras.losses.CategoricalCrossentropy())
         model.fit(x=x, y=y, epochs=15)
+
+    if (DATASET == "cifar_100_f"):
+        #convnet
+        model.add(tf.keras.layers.Conv2D(64, kernel_size=(3, 3), activation='relu', dilation_rate=(1, 1), padding='same', input_shape=data_shape))
+        model.add(tf.keras.layers.Conv2D(64, kernel_size=(2, 2), activation='relu', dilation_rate=(1, 1), padding='same'))
+        model.add(tf.keras.layers.MaxPooling2D(pool_size=(2, 2)))
+        model.add(tf.keras.layers.Conv2D(128, kernel_size=(3, 3), activation='relu', dilation_rate=(1, 1), padding='same'))
+        model.add(tf.keras.layers.MaxPooling2D(pool_size=(2, 2)))
+        model.add(tf.keras.layers.Conv2D(256, kernel_size=(3, 3), activation='relu', dilation_rate=(1, 1), padding='same'))
+        model.add(tf.keras.layers.MaxPooling2D(pool_size=(2, 2)))
+        model.add(tf.keras.layers.Conv2D(512, kernel_size=(3, 3), activation='relu', dilation_rate=(1, 1), padding='same'))
+        #model.add(tf.keras.layers.MaxPooling2D(pool_size=(2, 2)))
+        #model.add(tf.keras.layers.Conv2D(1024, kernel_size=(3, 3), activation='relu', dilation_rate=(1, 1), padding='same'))
+        #model.add(tf.keras.layers.MaxPooling2D(pool_size=(2, 2)))
+        #model.add(tf.keras.layers.Conv2D(1024, kernel_size=(3, 3), activation='relu', dilation_rate=(1, 1)))
+        #model.add(tf.keras.layers.MaxPooling2D(pool_size=(2, 2)))
+
+
+        model.add(tf.keras.layers.Flatten())
+        #neural net
+        model.add(tf.keras.layers.Dense(4096, activation=tf.nn.relu))
+        if (dropout):
+            model.add(tf.keras.layers.Dropout(dropRate))
+        model.add(tf.keras.layers.Dense(4096, activation=tf.nn.sigmoid))
+        if (dropout):
+            model.add(tf.keras.layers.Dropout(dropRate))
+        model.add(tf.keras.layers.Dense(y.shape[1], activation=tf.nn.softmax))
+
+        model.compile(optimizer='sgd', loss=tf.keras.losses.CategoricalCrossentropy())
+        model.fit(x=x, y=y, epochs=20)
 
 
     return model
