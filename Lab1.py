@@ -1,5 +1,6 @@
 
 import os
+import sys
 import numpy as np
 import tensorflow as tf
 from tensorflow import keras
@@ -316,7 +317,35 @@ def evalResults(data, preds):
 
 #=========================<Main>================================================
 
+def parse_args():
+    global DATASET
+    global ALGORITHM
+    params = sys.argv[:]
+    params.pop(0)
+    while len(params) > 0:
+        opt = params.pop(0)
+        if (opt == '--dataset'):
+            DATASET = params.pop(0)
+        elif (opt == '--type'):
+            alg = params.pop(0)
+            if (alg == 'net'):
+                ALGORITHM = 'tf_net'
+            elif (alg == 'conv'):
+                ALGORITHM = 'tf_conv'
+            elif (alg == 'guesser'):
+                ALGORITHM = 'guesser'
+        elif (opt == '--help'):
+            print("options:")
+            print("--dataset [mnist_d, mnist_f, cifar_10, cifar_100_f, cifar_100_c]")
+            print("--type [net, conv, guesser]")
+            print("UNIMPLEMENTED: --output-weights [file_name]")
+            quit()
+        pass
+    pass
+
+
 def main():
+    parse_args()
     raw = getRawData()
     data = preprocessData(raw)
     model = trainModel(data[0])
