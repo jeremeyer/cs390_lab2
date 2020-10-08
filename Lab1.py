@@ -26,36 +26,45 @@ ALGORITHM = "tf_net"
 DATASET = "cifar_100_f"
 #DATASET = "cifar_100_c"
 
-if DATASET == "mnist_d":
-    NUM_CLASSES = 10
-    IH = 28
-    IW = 28
-    IZ = 1
-    IS = 784
-elif DATASET == "mnist_f":
-    NUM_CLASSES = 10
-    IH = 28
-    IW = 28
-    IZ = 1
-    IS = 784
-elif DATASET == "cifar_10":
-    NUM_CLASSES = 10
-    IH = 32
-    IW = 32
-    IZ = 3
-    IS = IH * IW * IZ
-elif DATASET == "cifar_100_f":
-    NUM_CLASSES = 100
-    IH = 32
-    IW = 32
-    IZ = 3
-    IS = IH * IW * IZ
-elif DATASET == "cifar_100_c":
-    NUM_CLASSES = 20
-    IH = 32
-    IW = 32
-    IZ = 3
-    IS = IH * IW * IZ
+OUTPUT = ''
+OUTPUT_TYPE = 'stdout'
+
+def update_dataset_params():
+    global IH
+    global IW
+    global IZ
+    global IS
+    global NUM_CLASSES
+    if DATASET == "mnist_d":
+        NUM_CLASSES = 10
+        IH = 28
+        IW = 28
+        IZ = 1
+        IS = 784
+    elif DATASET == "mnist_f":
+        NUM_CLASSES = 10
+        IH = 28
+        IW = 28
+        IZ = 1
+        IS = 784
+    elif DATASET == "cifar_10":
+        NUM_CLASSES = 10
+        IH = 32
+        IW = 32
+        IZ = 3
+        IS = IH * IW * IZ
+    elif DATASET == "cifar_100_f":
+        NUM_CLASSES = 100
+        IH = 32
+        IW = 32
+        IZ = 3
+        IS = IH * IW * IZ
+    elif DATASET == "cifar_100_c":
+        NUM_CLASSES = 20
+        IH = 32
+        IW = 32
+        IZ = 3
+        IS = IH * IW * IZ
 
 
 #=========================<Classifier Functions>================================
@@ -312,6 +321,7 @@ def evalResults(data, preds):
     print("Classifier algorithm: %s" % ALGORITHM)
     print("Classifier accuracy: %f%%" % (accuracy * 100))
     print()
+    return accuracy * 100
 
 
 
@@ -320,6 +330,8 @@ def evalResults(data, preds):
 def parse_args():
     global DATASET
     global ALGORITHM
+    global OUTPUT
+    global OUTPUT_TYPE
     params = sys.argv[:]
     params.pop(0)
     while len(params) > 0:
@@ -338,20 +350,59 @@ def parse_args():
             print("options:")
             print("--dataset [mnist_d, mnist_f, cifar_10, cifar_100_f, cifar_100_c]")
             print("--type [net, conv, guesser]")
+            print("--output-type [plot_all]")
             print("UNIMPLEMENTED: --output-weights [file_name]")
             quit()
+        elif (opt == '--output-type'):
+            OUTPUT_TYPE = params.pop(0)
+        elif (opt == '-o'):
+            OUTPUT = params.pop(0)
         pass
     pass
 
 
-def main():
-    parse_args()
+def run_algorithm():
+    update_dataset_params()
     raw = getRawData()
     data = preprocessData(raw)
     model = trainModel(data[0])
     preds = runModel(data[1][0], model)
-    evalResults(data[1], preds)
+    return evalResults(data[1], preds)
 
+def run_plotter():
+    import matplotlib.pyplot as plt; plt.rcdefaults()
+    import numpy as np
+    import matplotlib.pyplot as plt
+
+    global DATASET
+
+    objects = ('mnist-d', 'mnist-f', 'cifar-10', 'cifar-100 coarse', 'cifar-100 fine')
+    y_pos = np.arange(len(objects))
+
+    performance = []
+    datasets = ["mnist_d", "mnist_f", "cifar_10", "cifar_100_c", "cifar_100_f"]
+
+    for i_dataset in datasets:
+        DATASET = i_dataset
+        performance.append(run_algorithm())
+
+    plt.bar(y_pos, performance, align='center', alpha=0.5)
+    plt.xticks(y_pos, objects)
+    plt.ylabel('% Accuracy')
+    if (ALGORITHM == "tf_net"):
+        plt.title("Standard Neural Network Accuracy")
+    elif (ALGORITHM == "tf_conv"):
+        plt.title("Convolutional Neural Network Accuracy")
+
+    plt.show()
+
+
+def main():
+    parse_args()
+    if (OUTPUT_TYPE == 'stdout'):
+        run_algorithm()
+    elif (OUTPUT_TYPE == 'plot_all'):
+        run_plotter()
 
 
 if __name__ == '__main__':
